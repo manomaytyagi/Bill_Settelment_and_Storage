@@ -70,20 +70,25 @@ export default function App() {
     setErrors({});
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!validate()) return;
 
+    const formData = new FormData();
+    formData.append("project", project);
+    formData.append("vendor", vendor);
+    formData.append("amount", amount);
+    formData.append("proof", proof);
+    formData.append("bill", bill);
+
     setStatus('submitting');
     console.log({ project, vendor, proof, bill, amount });
-
-    setTimeout(() => {
-      setStatus('success');
-      setTimeout(() => {
-        resetForm();
-        setStatus('idle');
-      }, 1800);
-    }, 600);
+    const response = await fetch("http://localhost:8000/submit", {
+      method: "POST",
+      body: formData,
+    });
+    setStatus("success");
+    resetForm();
   }
 
   return (
