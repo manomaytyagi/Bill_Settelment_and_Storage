@@ -47,6 +47,7 @@ export default function App() {
   const [proof, setProof] = useState(null);
   const [bill, setBill] = useState(null);
   const [amount, setAmount] = useState('');
+  const [submitError, setSubmitError] = useState(null)
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState('idle');
 
@@ -82,13 +83,22 @@ export default function App() {
     formData.append("bill", bill);
 
     setStatus('submitting');
+    setSubmitError(null);
     console.log({ project, vendor, proof, bill, amount });
-    const response = await fetch("http://localhost:8000/submit", {
-      method: "POST",
-      body: formData,
-    });
-    setStatus("success");
-    resetForm();
+    try {
+      const response = await fetch("http://localhost:8000/submit", {
+        method: "POST",
+        body: formData,
+      });
+      if(!response.ok) throw new Error("Submission Failed")
+      setStatus("success")
+      resetForm();
+    }
+    catch (err) {
+      setStatus("idle")
+      setSubmitError(err.message)
+    }
+
   }
 
   return (
@@ -191,6 +201,7 @@ export default function App() {
             )}
             {status === 'success' ? 'Submitted ✓' : status === 'submitting' ? 'Submitting…' : 'Submit Bill'}
           </button>
+          {submitError && <p className='text-xs text-rose-500'> {submitError}</p>}
         </form>
       </div>
     </div>
